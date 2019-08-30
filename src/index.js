@@ -88,13 +88,7 @@ export function createSelectorCreator(memoize, ...memoizeOptions) {
 
 export const createSelector = createSelectorCreator(defaultMemoize)
 
-export function createStructuredSelector(selectors, selectorCreator = createSelector) {
-  if (typeof selectors !== 'object') {
-    throw new Error(
-      'createStructuredSelector expects first argument to be an object ' +
-      `where each property is a selector, instead received a ${typeof selectors}`
-    )
-  }
+export function _createStructuredSelector(selectors, selectorCreator = createSelector) {
   const objectKeys = Object.keys(selectors)
   return selectorCreator(
     objectKeys.map(key => selectors[key]),
@@ -105,4 +99,19 @@ export function createStructuredSelector(selectors, selectorCreator = createSele
       }, {})
     }
   )
+}
+
+export function createStructuredSelector(selectors) {
+  if (typeof selectors !== 'object') {
+    throw new Error(
+      'createStructuredSelector expects first argument to be an object ' +
+      `where each property is a selector, instead received a ${typeof selectors}`
+    )
+  }
+  for (const key in selectors) {
+    if (typeof selectors[key] === 'object') {
+      selectors[key] = createStructuredSelector(selectors[key])
+    }
+  }
+  return _createStructuredSelector(selectors)
 }

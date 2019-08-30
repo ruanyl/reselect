@@ -386,6 +386,21 @@ suite('selector', () => {
     assert.strictEqual(selector({ a: 1, b: 2 }), firstResult)
     assert.deepEqual(selector({ a: 2, b: 2 }), { x: 2, y: 2 })
   })
+  test('nested structured selector', () => {
+    const selector = createStructuredSelector({
+      x: state => state.a,
+      y: {
+        z: state => state.b
+      }
+    })
+    const firstResult = selector({ a: 1, b: 2 })
+    assert.deepEqual(firstResult, { x: 1, y: { z: 2 } })
+    assert.strictEqual(selector({ a: 1, b: 2 }), firstResult)
+
+    const secondResult = selector({ a: 2, b: 2 })
+    assert.deepEqual(secondResult, { x: 2, y: { z: 2 } })
+    assert.strictEqual(selector({ a: 2, b: 2 }), secondResult)
+  })
   test('resetRecomputations', () => {
     const selector = createSelector(
       state => state.a,
